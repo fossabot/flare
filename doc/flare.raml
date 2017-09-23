@@ -1,0 +1,124 @@
+#%RAML 1.0
+title: Flare
+version: 0.1.0
+protocols:
+  - http
+  - https
+mediaType:
+  - application/json
+
+types:
+  Pagination:
+    type: object
+    properties:
+      limit:
+        required: true
+        type: number
+        description: This is used to control how many elements gonna be returned.
+        default: 30
+      offset:
+        required: true
+        type: number
+        description: The offset used to retrive elements.
+        default: 0
+      total:
+          required: true
+          type: number
+  Resource:
+    type: object
+    properties:
+      id:
+        required: true
+        type: string
+      adrresses:
+        required: true
+        type: string[]
+      path:
+        required: true
+        type: string
+      change:
+        required: true
+        type: object
+        properties:
+          field:
+            type: string
+          kind:
+            type: string
+          dateFormat?:
+            type: string
+      createdAt:
+        required: true
+        type: string
+/resources:
+  description: Manage all resources from Flare.
+  get:
+    description: get a single resource
+    queryParameters:
+      limit?: number
+      offset?: number
+    responses:
+      200:
+        body:
+          type: object
+          example: |
+            {
+              "pagination": {
+                "limit": 30,
+                "offset": 0,
+                "total": 2
+              },
+              "resources": [
+                {
+                  "id": "1",
+                  "domains": ["domain1.io", "domain2.io"],
+                  "path": "/product/*/stock/{track}",
+                  "createdAt": "",
+                  "change": {
+                    "field": "asdasd",
+                    "kind": "asdasd",
+                    "dateFormat": "asdasdasd"
+
+                  }
+
+                }
+              ]
+            }
+          properties:
+            pagination:
+              type: Pagination
+            resources:
+              type: Resource[]
+
+      204:
+      400:
+      500:
+  post:
+    responses:
+      201:
+      400:
+      409:
+      500:
+
+/resources/{id}:
+  get:
+    responses:
+      200:
+      404:
+      500:
+  delete:
+    responses:
+      204:
+      404:
+      500:
+
+/resources/{resourceId}/subscriptions:
+  get:
+  post:
+
+/resources/{resourceId}/subscriptions/{id}:
+  get:
+  delete:
+
+/documents/{id}:
+  get:
+  post:

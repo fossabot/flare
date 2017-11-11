@@ -1,0 +1,69 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is a sample server Petstore server.  You can find out more about
+    Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
+    #swagger](http://swagger.io/irc/).      For this sample, you can use the api
+    key `special-key` to test the authorization     filters.
+  version: 0.1.0
+  title: Flare
+  contact:
+    email: diego.bernardes@outlook.com
+tags:
+  - name: resource
+    description: Represent the endpoints that are tracked for changes
+schemes:
+  - http
+paths:
+  /resources:
+    get:
+      tags:
+        - resource
+      summary: Get a list of resources
+      responses:
+        '200':
+          description: done....
+    post:
+      tags:
+        - resource
+      summary: Create a new resource
+      responses:
+        '200':
+          description: done....
+    delete:
+      tags:
+        - resource
+      summary: Create a new resource
+      responses:
+        '200':
+          description: done....
+  /resources/{id}:
+    get:
+      tags:
+        - resource
+      summary: Create a new resource
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: done....
+
+components:
+  parameters:
+    offset:
+      description: The number of items to skip before starting to collect the result set.
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    limit:
+      description: The number of items to return.
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 0

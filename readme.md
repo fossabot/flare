@@ -1,3 +1,5 @@
+olhar as configs do release: https://github.com/bketelsen/ngc/blob/master/.goreleaser.yml
+
 # <img src="doc/logo.png" border="0" alt="flare" height="45">
 <a href="https://travis-ci.org/diegobernardes/flare"><img src="https://img.shields.io/travis/diegobernardes/flare/master.svg?style=flat-square" alt="Build Status"></a>
 <a href="https://coveralls.io/github/diegobernardes/flare"><img src="https://img.shields.io/coveralls/diegobernardes/flare/master.svg?style=flat-square" alt="Coveralls"></a>

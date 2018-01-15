@@ -6,18 +6,9 @@ defmodule Flare.Domain.Resource.HTTP.Service do
   # a ideia eh buscar a merda toda do application.get_env em todo request mesmo.
 
   def index(conn, _params) do
-    IO.inspect(conn)
-
     case @repository.all() do
       {:ok, result} -> render(conn, "index.json", resources: Map.get(result, :resources))
     end
-  end
-
-  def handle_info({:EXIT, from, reason}, state) do
-    IO.puts("Exit pid: #{inspect(from)} reason: #{inspect(reason)}")
-    child = state[from]
-    {:ok, pid} = child.start_link()
-    {:noreply, Map.put(state, pid, child)}
   end
 
   def show(conn, %{"id" => id}) do

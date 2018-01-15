@@ -1,7 +1,8 @@
 defmodule Flare.Infra.HTTP do
   def controller do
     quote do
-      use Phoenix.Controller, namespace: Flare, except: "render/3"
+      use Phoenix.Controller, namespace: Flare
+
       import Plug.Conn
       import Flare.Infra.HTTP.Router.Helpers
     end
@@ -12,7 +13,6 @@ defmodule Flare.Infra.HTTP do
       use Phoenix.View, root: "lib/flare/web/templates", namespace: Flare
 
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
-
       import Flare.Infra.HTTP.Router.Helpers
     end
   end
@@ -20,6 +20,7 @@ defmodule Flare.Infra.HTTP do
   def router do
     quote do
       use Phoenix.Router
+
       import Plug.Conn
       import Phoenix.Controller
     end

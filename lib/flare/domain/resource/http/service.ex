@@ -3,9 +3,15 @@ defmodule Flare.Domain.Resource.HTTP.Service do
   alias Flare.Infra.HTTP.ErrorView
 
   def index(conn, _params) do
+    # parse pagination
+    # validate pagination
+    # ok - find all
+    # ok - return response
+
     repo = repository()
     case repo.all() do
       {:ok, result} -> render(conn, "index.json", resources: Map.get(result, :resources))
+      {:error, msg} -> render(conn, ErrorView, "404.json")
     end
   end
 

@@ -19,10 +19,10 @@ defmodule FlareWeb.ConnCase do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      import FlareWeb.Router.Helpers
+      import Flare.Infra.HTTP.Router.Helpers
 
       # The default endpoint for testing
-      @endpoint FlareWeb.Endpoint
+      @endpoint Flare.Infra.HTTP.Endpoint
     end
   end
 

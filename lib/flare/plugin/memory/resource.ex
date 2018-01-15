@@ -7,21 +7,7 @@ defmodule Flare.Plugin.Memory.Resource do
   end
 
   def all() do
-    Agent.get(__MODULE__, fn set ->
-      set
-    end)
-
-    # [
-    #   %{
-    #     id: "diego",
-    #     addresses: ["http://app.com"],
-    #     path: "/users/{id}",
-    #     change: %{
-    #       field: "updatedAt",
-    #       format: "2016"
-    #     }
-    #   }
-    # ]
+    {:ok, Agent.get(__MODULE__, fn set -> set end)}
   end
 
   def create(_content) do

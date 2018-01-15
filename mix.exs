@@ -43,8 +43,7 @@ defmodule Flare.Mixfile do
 
       # MongoDB
       {:mongodb, ">= 0.0.0"},
-      {:poolboy, ">= 0.0.0"},
-      {:benchee, "~> 0.11", only: :dev}
+      {:poolboy, ">= 0.0.0"}
     ]
   end
 end

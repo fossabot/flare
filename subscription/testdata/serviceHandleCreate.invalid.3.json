@@ -1,6 +1,0 @@
-{
-  "error": {
-    "title": "invalid subscription",
-    "detail": "error during parse '%zzzzz' to url.URL: parse %zzzzz: invalid URL escape \"%zz\""
-  }
-}

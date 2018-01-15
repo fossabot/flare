@@ -1,0 +1,2 @@
+defmodule Flare do
+end

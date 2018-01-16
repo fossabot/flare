@@ -8,8 +8,7 @@ defmodule Flare.Domain.Resource.HTTP.Service do
     # ok - find all
     # ok - return response
 
-    repo = repository()
-    case repo.all() do
+    case repository().all() do
       {:ok, result} -> render(conn, "index.json", resources: Map.get(result, :resources))
       {:error, msg} -> render(conn, ErrorView, "404.json")
     end

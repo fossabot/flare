@@ -7,15 +7,17 @@ defmodule Flare.Plugin.MongoDB.Resource do
   @pid :mongo
   @collection "resources"
 
+  # @callback all() :: {:ok, %{resources: [Resource], pagination: Pagination}} | {:error, RepositoryError}
+  # @callback one(String.t()) :: {:ok, Resource} | {:error, RepositoryError}
+  # @callback create(Resource) :: :ok | {:error, RepositoryError}
+  # @callback destroy(String.t()) :: :ok | {:error, RepositoryError}
+
   def all(opts \\ []) do
     opts = Keyword.merge(opts, options())
 
     t1 =
       Task.async(fn ->
-        %{
-          step: :query,
-          result: Mongo.find(@pid, @collection, %{}, opts) |> Enum.map(&transform/1)
-        }
+        %{step: :query, result: Mongo.find(@pid, @collection, %{}, opts) |> Enum.map(&transform/1)}
       end)
 
     t2 =

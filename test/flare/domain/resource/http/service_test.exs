@@ -15,9 +15,7 @@ defmodule Flare.Domain.Resource.HTTP.ServiceTest do
           :flare,
           :repository,
           provider: MongoDB,
-          options: [
-            pool: DBConnection.Poolboy
-          ]
+          options: [pool: DBConnection.Poolboy]
         )
     end
   end
@@ -39,6 +37,7 @@ defmodule Flare.Domain.Resource.HTTP.ServiceTest do
     conn
     |> get(resource_path(conn, :index))
     |> json_response(200)
+    |> IO.insepect()
   end
 end
 

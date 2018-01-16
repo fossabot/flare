@@ -4,12 +4,11 @@ defmodule Flare.Plugin.MongoDB.Resource do
 
   # essas merdas tem que ser carregadas em tempo de execucao.
   @bucket_size Application.get_env(:flare, :repository)[:resource][:bucket_size]
-  @options Application.get_env(:flare, :repository)[:options]
   @pid :mongo
   @collection "resources"
 
   def all(opts \\ []) do
-    opts = Keyword.merge(opts, Application.get_env(:flare, :repository)[:options])
+    opts = Keyword.merge(opts, options())
 
     t1 =
       Task.async(fn ->
@@ -38,7 +37,7 @@ defmodule Flare.Plugin.MongoDB.Resource do
   end
 
   def one(id, opts \\ []) do
-    opts = Keyword.merge(opts, @options)
+    opts = Keyword.merge(opts, options())
 
     case Mongo.find_one(@pid, @collection, %{"id" => id}, opts) do
       doc when is_map(doc) -> {:ok, transform(doc)}
@@ -49,7 +48,7 @@ defmodule Flare.Plugin.MongoDB.Resource do
   def bucketsCount(id, opts \\ []) do
     opts =
       opts
-      |> Keyword.merge(@options)
+      |> Keyword.merge(options())
       |> Keyword.put(:projection, %{"bucketsCount" => 1})
 
     Mongo.find_one(@pid, @collection, %{"id" => id}, opts) |> Map.get("bucketsCount")
@@ -63,14 +62,14 @@ defmodule Flare.Plugin.MongoDB.Resource do
       |> Map.put("buckets", %{"0" => 0})
       |> Map.put("bucketsCount", 0)
 
-    case Mongo.insert_one(@pid, @collection, content, @options) do
+    case Mongo.insert_one(@pid, @collection, content, options()) do
       {:ok, _} -> {:ok, Map.get(content, "id")}
       {:error, %Mongo.Error{code: 11000}} -> {:error, "duplicate key on address or path"}
     end
   end
 
   def delete(id) do
-    case Mongo.delete_one(@pid, @collection, %{"id" => id}, @options) do
+    case Mongo.delete_one(@pid, @collection, %{"id" => id}, options()) do
       {:ok, %Mongo.DeleteResult{deleted_count: 0}} -> {:error, :not_found}
       {:ok, _} -> :ok
     end
@@ -98,7 +97,7 @@ defmodule Flare.Plugin.MongoDB.Resource do
       @collection,
       %{"id" => id},
       %{"$inc" => %{"buckets.#{key}" => 1}},
-      @options
+      options()
     )
   end
 
@@ -122,4 +121,6 @@ defmodule Flare.Plugin.MongoDB.Resource do
       change: Map.get(doc, "change")
     }
   end
+
+  defp options, do: Application.get_env(:flare, :repository)[:options]
 end

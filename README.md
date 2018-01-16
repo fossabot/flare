@@ -1,4 +1,7 @@
 -----
+no teste qnd ele ligar, tem que ligar o supervisor do mongodb...
+
+-----
 quero ligar o worker que vai ser um genstage, ele vai ligar os workers de acordo com a demanda.
 dai vou ligar os producers que vao ler das filas e colocar no worker.
 todo esse processo vai ter backpressure.

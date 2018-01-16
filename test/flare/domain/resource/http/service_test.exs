@@ -20,18 +20,12 @@ defmodule Flare.Domain.Resource.HTTP.ServiceTest do
     end
   end
 
-  # existe alguma forma de apontar os tests pra  funcao la embaixo!?
-  # tem como faerum loop e ir setando as paradas!?
-
-  @tag provider: :memory
-  describe "Given a memory repository" do
-    test("index/2 responds with all Users", %{conn: conn}, do: index(conn))
-  end
-
-  @tag provider: :mongodb
-  describe "Given a mongodb repository" do
-    test("index/2 responds with all Users", %{conn: conn}, do: index(conn))
-  end
+  Enum.each([:memory, :mongodb], fn(provider) ->
+    @tag provider: provider
+    describe "given a #{provider} repository" do
+      test("index/2 responds with all Users", %{conn: conn}, do: index(conn))
+    end
+  end)
 
   def index(conn) do
     conn

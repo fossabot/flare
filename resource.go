@@ -1,4 +1,4 @@
-// Copyright 2017 Diego Bernardes. All rights reserved.
+// Copyright 2018 Diego Bernardes. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -39,6 +39,9 @@ type ResourceRepositorier interface {
 	FindAll(context.Context, *Pagination) ([]Resource, *Pagination, error)
 	FindOne(context.Context, string) (*Resource, error)
 	FindByURI(context.Context, string) (*Resource, error)
+	FetchPartitions(ctx context.Context, id string) (partitions []string, err error)
+	LeavePartition(ctx context.Context, id, partition string) error
+	JoinPartition(ctx context.Context, id string) (string, error)
 	Create(context.Context, *Resource) error
 	Delete(context.Context, string) error
 }

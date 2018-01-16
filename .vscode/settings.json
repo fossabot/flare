@@ -3,7 +3,6 @@
   "editor.formatOnSave": true,
   "files.exclude": {
     "**/.git": true,
-    "**/.svn": true,
     "**/.hg": true,
     "**/.DS_Store": true,
     "service/flare/cmd/flare": true
@@ -27,6 +26,10 @@
   },
   "[markdown]": {
     "files.trimTrailingWhitespace": false
+  },
+  "[makefile]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 2
   },
   "go.formatTool": "goreturns",
   "go.formatFlags": [
@@ -61,11 +64,5 @@
     "-shadow"
   ],
   "go.autocompleteUnimportedPackages": true,
-  "go.docsTool": "gogetdoc",
-  "terraform.formatOnSave": true,
-  "terraform.formatVarsOnSave": true,
-  "[makefile]": {
-    "editor.insertSpaces": false,
-    "editor.tabSize": 2
-  }
+  "go.docsTool": "gogetdoc"
 }

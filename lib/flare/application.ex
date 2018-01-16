@@ -3,8 +3,6 @@ defmodule Flare.Application do
   use Supervisor
 
   def start(_type, _args) do
-    Application.put_env(:flare, :diego, :bernardes)
-
     children =
       [
         supervisor(Flare.Infra.HTTP.Endpoint, []),

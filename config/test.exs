@@ -5,3 +5,6 @@ config :flare, Flare.Infra.HTTP.Endpoint,
   server: false
 
 config :logger, level: :warn
+
+config :flare, :repository,
+  provider: Memory

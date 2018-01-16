@@ -1,4 +1,4 @@
-defmodule FlareWeb.ErrorViewTest do
+defmodule Flare.Domain.Resource.HTTP.ServiceViewTest do
   use FlareWeb.ConnCase, async: true
   import Phoenix.View
 
@@ -6,7 +6,15 @@ defmodule FlareWeb.ErrorViewTest do
   alias Flare.Domain.Resource.HTTP.ServiceView, as: View
 
   test "render index.json" do
-    assert render(View, "index.json", resources: resources_request()) == resources_response()
+    assert render(View, "index.json", resources: resources_request()) == %{resources: resources_response()}
+  end
+
+  test "render show.json" do
+    assert render(
+      View,
+      "show.json",
+      resource: resources_request() |> Enum.at(0)
+    ) == resources_response() |> Enum.at(0)
   end
 
   test "render error.json" do

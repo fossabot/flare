@@ -1,13 +1,14 @@
 defmodule Flare.Plugin.Memory.Resource do
   @behaviour Flare.Domain.Resource.Repository
   use Agent
+  alias Flare.Domain.Resource
 
   def start_link do
-    Agent.start_link(fn -> %{} end, name: __MODULE__)
+    Agent.start_link(fn -> [%Resource{}] end, name: __MODULE__)
   end
 
   def all() do
-    {:ok, Agent.get(__MODULE__, fn set -> set end)}
+    {:ok, %{resources: Agent.get(__MODULE__, fn set -> set end)}}
   end
 
   def create(_content) do

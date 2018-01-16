@@ -2,13 +2,14 @@ defmodule Flare.Plugin.MongoDB.Resource do
   @behaviour Flare.Domain.Resource.Repository
   alias Flare.Domain.Resource
 
+  # essas merdas tem que ser carregadas em tempo de execucao.
   @bucket_size Application.get_env(:flare, :repository)[:resource][:bucket_size]
   @options Application.get_env(:flare, :repository)[:options]
   @pid :mongo
   @collection "resources"
 
   def all(opts \\ []) do
-    opts = Keyword.merge(opts, @options)
+    opts = Keyword.merge(opts, Application.get_env(:flare, :repository)[:options])
 
     t1 =
       Task.async(fn ->

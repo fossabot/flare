@@ -124,97 +124,6 @@ Ready to run in production? Please [check our deployment guides](http://www.phoe
 
 
 # --------------------------------------------------------------------------------------------------
-# - http.server.addr
-#   The address the HTTP server gonna listen. The value should have this format: "host:port".
-#   The host can be omited, in this case, Flare gonna bind to all available interfaces. The port is
-#   required. Default value: ":8080"
-#
-# - http.default-limit
-#   The quantity of entities to be returned by default. Default value: 30.
-#
-# - http.timeout
-#   The max time a request has to process. Default value: 1s.
-#
-[http]
-addr          = ":8080"
-default-limit = 30
-timeout       = "1s"
-
-# --------------------------------------------------------------------------------------------------
-# - repository.engine
-#   The location of the content. Default value: "memory". Possible values: "memory" and "mongodb".
-#
-[repository]
-engine = "memory"
-
-# --------------------------------------------------------------------------------------------------
-# If "repository.engine" is "mongodb", the options bellow can be used:
-#
-#  - repository.addrs
-#    List of "host:port" to MongoDB servers. Default value: ["localhost:27017"]
-#
-#  - repository.database
-#    Name of the database on MongoDB. Default value: "flare"
-#
-#  - repository.username
-#    Username used to connect to MongoDB. Default value is unset.
-#
-#  - repository.password
-#    Password used to connect to MongoDB. Default value is unset.
-#
-#  - repository.replica-set
-#    Replica set, if specified, will prevent the obtained session from communicating with any server
-#    which is not part of a replica set with the given name. The default is to communicate with any
-#    server specified or discovered via the servers contacted. Default value is unset.
-#
-#  - repository.pool-limit
-#    Defines the per-server socket pool limit. Defaults value is 4096.
-#
-#  - repository.timeout
-#    Timeout is the amount of time to wait for a server to respond when first connecting and on
-#    follow up operations in the session. Default value is 1s.
-#
-[repository]
-engine      = "mongodb"
-addrs       = ["localhost:27017"]
-database    = "flare"
-username    = "flare"
-password    = "flare"
-replica-set = ""
-pool-limit  = 4096
-timeout     = "1s"
-
-# --------------------------------------------------------------------------------------------------
-# - task.engine
-#   The engine used to enqueue jobs. If the 'sqs' is chosen, the 'aws' config block must be
-#   configured. Possible values: "sqs" or "memory". Default value: "memory".
-#
-# - task.queue-subscription-bucket
-#   If the SQS is used as engine, there is a option to set the queue name. Default value is
-#   "flare-document-queue".
-#
-[task]
-engine                      = "sqs"
-queue-subscription-bucket   = "flare-subscription-bucket"
-queue-subscription-spread   = "flare-subscription-spread"
-queue-subscription-delivery = "flare-subscription-delivery"
-
-# --------------------------------------------------------------------------------------------------
-# - aws.key
-#   Key used to connect to AWS. Default value is unset.
-#
-# - aws.secret
-#   Secret used to connect to AWS. Default value is unset.
-#
-# - aws.region
-#   Region used to connect to AWS. Default value is unset.
-#
-[aws]
-key    = "key"
-secret = "secret"
-region = "us-east-1"
-
-# --------------------------------------------------------------------------------------------------
 # - log.level
 #   The minimum log level to be displayed. Default value: "debug". Possible values: "debug", "info",
 #   "warn" and "error".
@@ -230,5 +139,59 @@ level  = "debug"
 output = "stdout"
 format = "human"
 
+[http]
+  [http.server]
+  addr          = ":8080"
+  default-limit = 30
+  timeout       = "1s"
 
+  [http.client]
+  max-idle-connections = 100
+  # and others ...
 
+[repository]
+provider = "mongodb"
+
+[worker]
+provider = "aws.sqs"
+
+  [worker.subscription.partition]
+  concurrency        = 10
+  concurrency-output = 100
+
+  [worker.subscription.spread]
+  concurrency            = 100
+  concurrency-output     = 100
+  concurrency-repository = 100
+
+  [worker.subscription.delivery]
+  concurrency = 1000
+
+[provider]
+  [provider.aws]
+  key    = "key"
+  secret = "secret"
+  region = "region"
+
+    [[provider.aws.sqs.queue]]
+    worker             = "subscription.partition"
+    visibility-timeout = "30s"
+    retention-period   = "10s"
+    max-message-size   = "100"
+    delivery-delay     = "10s"
+    receive-wait-time  = "20s"
+
+    [[provider.aws.sqs.queue]]
+    worker = "subscription.spread"
+
+    [[provider.aws.sqs.queue]]
+    worker = "subscription.delivery"
+
+  [provider.mongodb]
+  addrs       = ["localhost:27017"]
+  database    = "flare"
+  username    = "flare"
+  password    = "flare"
+  replica-set = ""
+  pool-limit  = 4096
+  timeout     = "1s"

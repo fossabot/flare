@@ -1,6 +1,7 @@
 defmodule Flare.Application do
-  use Application
   use Supervisor
+
+  # renomear esse cara pra supervisor!?
 
   def start(_type, _args) do
     children =

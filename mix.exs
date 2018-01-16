@@ -15,7 +15,7 @@ defmodule Flare.Mixfile do
 
   def application do
     [
-      mod: {Flare.Application, []},
+      mod: {Flare, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

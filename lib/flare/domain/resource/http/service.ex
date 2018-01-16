@@ -16,8 +16,7 @@ defmodule Flare.Domain.Resource.HTTP.Service do
   end
 
   def show(conn, %{"id" => id}) do
-    repo = repository()
-    case repo.one(id) do
+    case repository().one(id) do
       {:ok, doc} -> render(conn, "show.json", resource: doc)
       {:error, :not_found} -> render(conn, ErrorView, "404.json")
     end

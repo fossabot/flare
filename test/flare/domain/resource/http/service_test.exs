@@ -37,7 +37,6 @@ defmodule Flare.Domain.Resource.HTTP.ServiceTest do
     conn
     |> get(resource_path(conn, :index))
     |> json_response(200)
-    |> IO.insepect()
   end
 end
 

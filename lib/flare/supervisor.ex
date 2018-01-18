@@ -1,4 +1,4 @@
-defmodule Flare.Application do
+defmodule Flare.Supervisor do
   use Supervisor
 
   # renomear esse cara pra supervisor!?
@@ -7,7 +7,7 @@ defmodule Flare.Application do
     children =
       [
         supervisor(Flare.Infra.HTTP.Endpoint, []),
-        supervisor(Flare.Plugin.Memory.Resource, []),
+        supervisor(Flare.Provider.Memory.Resource, []),
         supervisor(Flare.Infra.Worker, []),
         worker(Mongo, [[name: :mongo, database: "flare", pool: DBConnection.Poolboy]])
       ] ++ worker_provider()

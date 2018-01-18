@@ -1,6 +1,6 @@
 defmodule Flare.Domain.Subscription.HTTP.Service do
   use Flare.Infra.HTTP, :controller
-  @repository Flare.Plugin.repository(:subscription)
+  @repository Flare.Provider.repository(:subscription)
 
   def index(conn, _params) do
     render(conn, "index.json", subscriptions: @repository.all())

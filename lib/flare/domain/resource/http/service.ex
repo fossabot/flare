@@ -45,5 +45,5 @@ defmodule Flare.Domain.Resource.HTTP.Service do
     end
   end
 
-  defp repository, do: Flare.Plugin.repository(:resource)
+  defp repository, do: Flare.Provider.repository(:resource)
 end

@@ -1,4 +1,4 @@
-defmodule Flare.Plugin.MongoDB.Resource do
+defmodule Flare.Provider.MongoDB.Resource do
   @behaviour Flare.Domain.Resource.Repository
   alias Flare.Domain.Resource
 
@@ -11,6 +11,9 @@ defmodule Flare.Plugin.MongoDB.Resource do
   # @callback one(String.t()) :: {:ok, Resource} | {:error, RepositoryError}
   # @callback create(Resource) :: :ok | {:error, RepositoryError}
   # @callback destroy(String.t()) :: :ok | {:error, RepositoryError}
+
+  def destroy(_) do
+  end
 
   def all(opts \\ []) do
     opts = Keyword.merge(opts, options())
@@ -78,9 +81,9 @@ defmodule Flare.Plugin.MongoDB.Resource do
   end
 
   # tem que ver os casos de erro agora.
-  # Flare.Plugin.MongoDB.Resource.bucket_placement("9799aabe-81e9-49c2-a49b-99817751d036")
-  # resource = Flare.Plugin.MongoDB.Resource.one("dcccf67b-f8c4-4c6c-8146-793ef29c856a")
-  # key = Flare.Plugin.MongoDB.Resource.bucket_select(resource)
+  # Flare.Provider.MongoDB.Resource.bucket_placement("9799aabe-81e9-49c2-a49b-99817751d036")
+  # resource = Flare.Provider.MongoDB.Resource.one("dcccf67b-f8c4-4c6c-8146-793ef29c856a")
+  # key = Flare.Provider.MongoDB.Resource.bucket_select(resource)
   # id = "dcccf67b-f8c4-4c6c-8146-793ef29c856a"
   def bucket_placement(id) do
     case one(id) do

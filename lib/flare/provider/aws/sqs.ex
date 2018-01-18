@@ -1,4 +1,4 @@
-defmodule Flare.Plugin.AWS.SQS do
+defmodule Flare.Provider.AWS.SQS do
   use GenServer
   require Logger
 

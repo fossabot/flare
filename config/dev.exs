@@ -41,10 +41,10 @@ config :flare, :subscription,
 
 # pegar fora do runner oq nao estiver no runner, isso vale pro provider.
 config :flare, :worker,
-  provider: Flare.Plugin.AWS.SQS,
+  provider: Flare.Provider.AWS.SQS,
   producers: [
     [
-      runner: Flare.Plugin.AWS.SQS,
+      runner: Flare.Provider.AWS.SQS,
       ingress: [
         concurrency: 1,
         rateLimit: [

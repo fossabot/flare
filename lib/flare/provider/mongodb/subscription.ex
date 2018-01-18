@@ -1,6 +1,6 @@
-defmodule Flare.Plugin.MongoDB.Subscription do
+defmodule Flare.Provider.MongoDB.Subscription do
   @behaviour Flare.Domain.Subscription.Repository
-  alias Flare.Plugin.MongoDB.Resource
+  alias Flare.Provider.MongoDB.Resource
 
   @options Application.get_env(:flare, :repository)[:options]
   @pid :mongo
@@ -20,7 +20,7 @@ defmodule Flare.Plugin.MongoDB.Subscription do
 
     # - validamos ante pra ver se ta tudo certo
     # - pede para o resource o bucket que vamos pertencer, em seguida colocamos no subscription, o count ja incrementa
-    # - qnd quiermos o bucket, vamos  buscar logo os 1000 elementos 
+    # - qnd quiermos o bucket, vamos  buscar logo os 1000 elementos
     {:ok, key} = Resource.bucket_placement(Map.get(content, "id"))
     content = Map.put(content, "bucket", key)
 

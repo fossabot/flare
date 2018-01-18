@@ -1,5 +1,5 @@
 defmodule Flare.Domain.Subscription.Worker.Bucket do
-  # @repository Flare.Plugin.repository(:resource)
+  # @repository Flare.Provider.repository(:resource)
 
   def perform(%{resourceId: resourceId}) do
     IO.inspect(resourceId)

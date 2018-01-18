@@ -1,4 +1,4 @@
-defmodule Flare.Plugin.Memory.Resource do
+defmodule Flare.Provider.Memory.Resource do
   @behaviour Flare.Domain.Resource.Repository
   use Agent
   alias Flare.Domain.Resource

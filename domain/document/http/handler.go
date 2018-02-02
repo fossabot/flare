@@ -124,16 +124,16 @@ func (h *Handler) fetchResource(
 	var resource *flare.Resource
 	if doc == nil {
 		resource, err = h.resourceRepository.FindByURI(ctx, documentID)
-		if err != nil {
-			status := http.StatusInternalServerError
-			if errRepo, ok := err.(flare.ResourceRepositoryError); ok && errRepo.NotFound() {
-				status = http.StatusNotFound
-			}
-			h.writer.Error(w, "error during resource search", err, status)
-			return nil
-		}
 	} else {
-		resource = &doc.Resource
+		resource, err = h.resourceRepository.FindOne(ctx, doc.Resource.ID)
+	}
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errRepo, ok := err.(flare.ResourceRepositoryError); ok && errRepo.NotFound() {
+			status = http.StatusNotFound
+		}
+		h.writer.Error(w, "error during resource search", err, status)
+		return nil
 	}
 
 	return resource

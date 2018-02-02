@@ -20,6 +20,12 @@ https://golang.org/pkg/io/#LimitReader
 - acho que podemos remover aqueles metodos de join/leave partition da interface, eles sao chamados dentro do msm pacote.... nao tem problema.
   na verdade nao sei, pq se nao a gente nao consegue testar....
 
+- tirar aquele join/leave partition, fazer isso por interfaces internas e nao deixar na interface publica.
+- renomear o findone para bindbyid e o findall para find
+- fetchpartitions, vira partitions
+
+- mover a criacao de filas e indices para o setup.
+
 criar uma goroutine no logger com formato para o stdout e com formato humano de que, se nada for printado por 1 segundo, pular 1 linha.
 se ja tiver pulado, nao pular mais ateh algo ser printado. (nice!!)
 

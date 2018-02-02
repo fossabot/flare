@@ -133,8 +133,39 @@ func (s *Subscription) Create(ctx context.Context, subscription *flare.Subscript
 func (s *Subscription) FindByPartition(
 	_ context.Context, resourceID, partition string,
 ) (<-chan flare.Subscription, <-chan error, error) {
-	panic("not implemented")
-	return nil, nil, nil
+	session := s.client.Session()
+
+	chanSubscriptions := make(chan flare.Subscription)
+	chanError := make(chan error)
+
+	go func() {
+		defer session.Close()
+		iter := session.
+			DB(s.database).
+			C(s.collection).
+			Find(bson.M{"partition": partition, "resource.id": resourceID}).
+			Iter()
+		defer iter.Close()
+
+		for {
+			var result flare.Subscription
+			next := iter.Next(&result)
+			if !next {
+				if iter.Timeout() {
+					continue
+				}
+
+				if err := iter.Err(); err != nil {
+					chanError <- errors.Wrap(err, "error during subscription fetch")
+				}
+				break
+			}
+
+			chanSubscriptions <- result
+		}
+	}()
+
+	return chanSubscriptions, chanError, nil
 }
 
 // HasSubscription check if a resource has subscriptions.
@@ -159,18 +190,26 @@ func (s *Subscription) HasSubscription(ctx context.Context, resourceId string) (
 }
 
 // Delete a given subscription.
-func (s *Subscription) Delete(_ context.Context, resourceId, id string) error {
+func (s *Subscription) Delete(ctx context.Context, resourceId, id string) error {
 	session := s.client.Session()
 	defer session.Close()
 
-	c := session.DB(s.database).C(s.collection)
+	subscription, err := s.FindOne(ctx, resourceId, id)
+	if err != nil {
+		return err
+	}
 
-	if err := c.Remove(bson.M{"id": id, "resource.id": resourceId}); err != nil {
+	c := session.DB(s.database).C(s.collection)
+	if err = c.Remove(bson.M{"id": id, "resource.id": resourceId}); err != nil {
 		if err == mgo.ErrNotFound {
 			return &errMemory{message: fmt.Sprintf(
 				"subscription '%s' at resource '%s' not found", id, resourceId,
 			), notFound: true}
 		}
+	}
+
+	if err = s.resourceRepository.LeavePartition(ctx, resourceId, subscription.Partition); err != nil {
+		return err
 	}
 	return nil
 }
@@ -180,18 +219,18 @@ func (s *Subscription) Trigger(
 	ctx context.Context,
 	kind string,
 	doc *flare.Document,
-	subscription *flare.Subscription,
+	sub *flare.Subscription,
 	fn func(context.Context, *flare.Document, *flare.Subscription, string) error,
 ) error {
 	session := s.client.Session()
 	defer session.Close()
 
-	var subscriptions []flare.Subscription
+	subscription := &flare.Subscription{}
 	err := session.
 		DB(s.database).
 		C(s.collection).
 		Find(bson.M{"resource.id": doc.Resource.ID}).
-		All(&subscriptions)
+		One(subscription)
 	if err != nil {
 		return errors.Wrap(err, "error while subscription search")
 	}
@@ -202,19 +241,12 @@ func (s *Subscription) Trigger(
 	}
 	doc.Resource = *resource
 
-	group, groupCtx := errgroup.WithContext(ctx)
-	for i := range subscriptions {
-		subscriptions[i].Resource = *resource
-		// group.Go(s.triggerProcess(groupCtx, subscriptions[i], doc, kind, fn))
-		_ = groupCtx
-	}
-
-	return errors.Wrap(group.Wait(), "error during processing")
+	return s.triggerProcess(ctx, subscription, doc, kind, fn)
 }
 
 func (s *Subscription) loadReferenceDocument(
 	session *mgo.Session,
-	subs flare.Subscription,
+	subs *flare.Subscription,
 	doc *flare.Document,
 ) (*flare.Document, error) {
 	content := make(map[string]interface{})
@@ -240,9 +272,9 @@ func (s *Subscription) newEntry(
 	groupCtx context.Context,
 	kind string,
 	session *mgo.Session,
-	subs flare.Subscription,
+	subs *flare.Subscription,
 	doc *flare.Document,
-	fn func(context.Context, flare.Subscription, string) error,
+	fn func(context.Context, *flare.Document, *flare.Subscription, string) error,
 ) error {
 	if kind == flare.SubscriptionTriggerDelete {
 		return nil
@@ -253,7 +285,7 @@ func (s *Subscription) newEntry(
 		return errors.Wrap(err, "error during document upsert")
 	}
 
-	if err = fn(groupCtx, subs, flare.SubscriptionTriggerCreate); err != nil {
+	if err = fn(groupCtx, doc, subs, flare.SubscriptionTriggerCreate); err != nil {
 		return errors.Wrap(err, "error during document subscription processing")
 	}
 	return nil
@@ -263,11 +295,11 @@ func (s *Subscription) triggerProcessDelete(
 	groupCtx context.Context,
 	kind string,
 	session *mgo.Session,
-	subs flare.Subscription,
+	subs *flare.Subscription,
 	doc *flare.Document,
-	fn func(context.Context, flare.Subscription, string) error,
+	fn func(context.Context, *flare.Document, *flare.Subscription, string) error,
 ) error {
-	if err := fn(groupCtx, subs, flare.SubscriptionTriggerDelete); err != nil {
+	if err := fn(groupCtx, doc, subs, flare.SubscriptionTriggerDelete); err != nil {
 		return errors.Wrap(err, "error during document subscription processing")
 	}
 
@@ -284,7 +316,7 @@ func (s *Subscription) triggerProcessDelete(
 
 func (s *Subscription) upsertSubscriptionTrigger(
 	session *mgo.Session,
-	subs flare.Subscription,
+	subs *flare.Subscription,
 	doc *flare.Document,
 ) error {
 	_, err := session.
@@ -306,43 +338,41 @@ func (s *Subscription) upsertSubscriptionTrigger(
 
 func (s *Subscription) triggerProcess(
 	groupCtx context.Context,
-	subs flare.Subscription,
+	subs *flare.Subscription,
 	doc *flare.Document,
 	kind string,
-	fn func(context.Context, flare.Subscription, string) error,
-) func() error {
-	return func() error {
-		session := s.client.Session()
-		defer session.Close()
+	fn func(context.Context, *flare.Document, *flare.Subscription, string) error,
+) error {
+	session := s.client.Session()
+	defer session.Close()
 
-		referenceDocument, err := s.loadReferenceDocument(session, subs, doc)
-		if err != nil {
-			return errors.Wrap(err, "error during reference document search")
-		}
+	referenceDocument, err := s.loadReferenceDocument(session, subs, doc)
+	if err != nil {
+		return errors.Wrap(err, "error during reference document search")
+	}
 
-		if referenceDocument == nil {
-			return s.newEntry(groupCtx, kind, session, subs, doc, fn)
-		}
-		referenceDocument.Resource = subs.Resource
+	if referenceDocument == nil {
+		return s.newEntry(groupCtx, kind, session, subs, doc, fn)
+	}
+	referenceDocument.Resource = subs.Resource
 
-		if kind == flare.SubscriptionTriggerDelete {
-			return s.triggerProcessDelete(groupCtx, kind, session, subs, doc, fn)
-		}
+	if kind == flare.SubscriptionTriggerDelete {
+		return s.triggerProcessDelete(groupCtx, kind, session, subs, doc, fn)
+	}
 
-		if newer := doc.Newer(referenceDocument); !newer {
-			return nil
-		}
-
-		if err = fn(groupCtx, subs, flare.SubscriptionTriggerUpdate); err != nil {
-			return errors.Wrap(err, "error during document subscription processing")
-		}
-
-		if err = s.upsertSubscriptionTrigger(session, subs, doc); err != nil {
-			return errors.Wrap(err, "error during update subscriptionTriggers")
-		}
-
+	if newer := doc.Newer(referenceDocument); !newer {
 		return nil
 	}
+
+	if err = fn(groupCtx, doc, subs, flare.SubscriptionTriggerUpdate); err != nil {
+		return errors.Wrap(err, "error during document subscription processing")
+	}
+
+	if err = s.upsertSubscriptionTrigger(session, subs, doc); err != nil {
+		return errors.Wrap(err, "error during update subscriptionTriggers")
+	}
+
+	return nil
 }
 
 // SetResourceRepository set the resource repository.

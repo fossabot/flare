@@ -51,7 +51,7 @@ func (r *Resource) FetchPartitions(ctx context.Context, id string) ([]string, er
 	defer session.Close()
 
 	var result struct {
-		Partition map[string]int `bson:"text"`
+		Partition map[string]int `bson:"partitions"`
 	}
 
 	err := session.
@@ -72,7 +72,17 @@ func (r *Resource) FetchPartitions(ctx context.Context, id string) ([]string, er
 	return content, nil
 }
 
-func (*Resource) LeavePartition(ctx context.Context, id, partition string) error {
+func (r *Resource) LeavePartition(ctx context.Context, id, partition string) error {
+	session := r.client.Session()
+	defer session.Close()
+
+	err := session.
+		DB(r.database).
+		C(r.collection).
+		Update(bson.M{"id": id}, bson.M{"$inc": bson.M{fmt.Sprintf("partitions.%s", partition): -1}})
+	if err != nil {
+		return errors.Wrap(err, "error during leave partition")
+	}
 	return nil
 }
 

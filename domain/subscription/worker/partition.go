@@ -7,9 +7,7 @@ package worker
 import (
 	"context"
 	"encoding/json"
-	"os"
 
-	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
@@ -85,8 +83,6 @@ func (t *Partition) Process(ctx context.Context, rawContent []byte) error {
 	}
 
 	partitions, err := t.repository.FetchPartitions(ctx, document.Resource.ID)
-	pretty.Println(partitions, err, document.Resource.ID)
-	os.Exit(1)
 	if err != nil {
 		return errors.Wrap(err, "could not get the partition count of a resource")
 	}

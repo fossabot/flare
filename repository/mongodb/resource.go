@@ -179,9 +179,8 @@ func (r *Resource) Create(_ context.Context, res *flare.Resource) error {
 	defer session.Close()
 
 	if err := session.DB(r.database).C(r.collection).Insert(content); err != nil {
-		errors.Wrap(err, "error during resource create")
+		return errors.Wrap(err, "error during resource create")
 	}
-
 	return nil
 }
 
@@ -309,7 +308,7 @@ func (r *Resource) ensureIndex() error {
 		EnsureIndex(mgo.Index{
 			Background: true,
 			Unique:     true,
-			Key:        []string{"addresses"},
+			Key:        []string{"addresses", "path"},
 		})
 	if err != nil {
 		return errors.Wrap(err, "error during index creation")

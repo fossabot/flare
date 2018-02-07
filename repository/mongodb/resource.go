@@ -255,7 +255,7 @@ func (r *Resource) Delete(_ context.Context, id string) error {
 	session.SetMode(mgo.Monotonic, true)
 	defer session.Close()
 
-	if err := session.DB("flare").C("resources").Remove(bson.M{"id": id}); err != nil {
+	if err := session.DB(r.database).C(r.collection).Remove(bson.M{"id": id}); err != nil {
 		if err == mgo.ErrNotFound {
 			return &errMemory{message: fmt.Sprintf("resource '%s' not found", id), notFound: true}
 		}

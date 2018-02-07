@@ -11,11 +11,12 @@ import (
 
 // Client is used to interact with MongoDB.
 type Client struct {
-	addrs    []string
-	database string
-	username string
-	password string
-	sess     *mgo.Session
+	addrs      []string
+	database   string
+	username   string
+	password   string
+	replicaSet string
+	sess       *mgo.Session
 }
 
 // Stop close the session with MongoDB.
@@ -42,11 +43,12 @@ func NewClient(options ...func(*Client)) (*Client, error) {
 	}
 
 	di := &mgo.DialInfo{
-		Addrs:    c.addrs,
-		Database: c.database,
-		FailFast: true,
-		Username: c.username,
-		Password: c.password,
+		Addrs:          c.addrs,
+		Database:       c.database,
+		FailFast:       true,
+		Username:       c.username,
+		Password:       c.password,
+		ReplicaSetName: c.replicaSet,
 	}
 
 	session, err := mgo.DialWithInfo(di)
@@ -76,4 +78,9 @@ func ClientUsername(username string) func(*Client) {
 // ClientPassword set the password to authenticate.
 func ClientPassword(password string) func(*Client) {
 	return func(c *Client) { c.password = password }
+}
+
+// ClientReplicaSet set the replica set.
+func ClientReplicaSet(rs string) func(*Client) {
+	return func(c *Client) { c.replicaSet = rs }
 }

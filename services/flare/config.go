@@ -104,6 +104,7 @@ func (c *config) mongodb() (*mongodb.Client, error) {
 		mongodb.ClientDatabase(c.getString("repository.database")),
 		mongodb.ClientUsername(c.getString("repository.username")),
 		mongodb.ClientPassword(c.getString("repository.password")),
+		mongodb.ClientReplicaSet(c.getString("repository.replica-set")),
 	)
 	return client, errors.Wrap(err, "error during MongoDB connection")
 }
